@@ -19,6 +19,9 @@ keywords = [
     "yjs",
 ]
 dependencies = [
+    "comm >=0.1.2",
+    "y-py >=0.5.5",
+    "textual >=0.10.1",
 ]
 
 [project.urls]
@@ -31,3 +34,7 @@ path = "ypywidgets/__init__.py"
 include = [
     "/ypywidgets",
 ]
+
+[project.entry-points.ypywidgets]
+checkbox = "ypywidgets.checkbox:Checkbox"
+txl_checkbox = "ypywidgets.txl.checkbox:Checkbox"
