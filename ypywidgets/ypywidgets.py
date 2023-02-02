@@ -10,7 +10,7 @@ from .yutils import YMessageType, YSyncMessageType, create_update_message, proce
 
 class Widget:
 
-    def __init__(self, name: str, open_comm: bool):
+    def __init__(self, name: str, open_comm: bool) -> None:
         self.name = name
         self._update_queue = asyncio.Queue()
         self.ydoc = Y.YDoc()
