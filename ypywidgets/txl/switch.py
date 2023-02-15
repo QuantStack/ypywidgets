@@ -1,11 +1,11 @@
-from textual.widgets import Checkbox as TextualCheckbox
+from textual.widgets import Switch as TextualSwitch
 
-from ..checkbox import Checkbox as CheckboxModel
+from ..switch import Switch as SwitchModel
 
 
-class Checkbox(TextualCheckbox):
+class Switch(TextualSwitch):
 
-    def __init__(self, model: CheckboxModel) -> None:
+    def __init__(self, model: SwitchModel) -> None:
         super().__init__()
         self.ymodel = model
         self.ymodel.yvalue.observe(self._on_ychange)
