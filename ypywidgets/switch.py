@@ -1,10 +1,10 @@
 from .ypywidgets import Widget
 
 
-class Checkbox(Widget):
+class Switch(Widget):
 
     def __init__(self, value: bool = False, open_comm: bool = True) -> None:
-        super().__init__(name="checkbox", open_comm=open_comm)
+        super().__init__(name="switch", open_comm=open_comm)
         self.yvalue = self.ydoc.get_map("value")
         self._set(value)
 

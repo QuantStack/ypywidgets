@@ -21,7 +21,7 @@ keywords = [
 dependencies = [
     "comm >=0.1.2",
     "y-py >=0.5.5",
-    "textual >=0.10.1",
+    "textual >=0.11",
 ]
 
 [project.urls]
@@ -36,5 +36,5 @@ include = [
 ]
 
 [project.entry-points.ypywidgets]
-checkbox = "ypywidgets.checkbox:Checkbox"
-txl_checkbox = "ypywidgets.txl.checkbox:Checkbox"
+switch = "ypywidgets.switch:Switch"
+txl_switch = "ypywidgets.txl.switch:Switch"
