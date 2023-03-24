@@ -13,7 +13,7 @@ authors = [
     { name = "David Brochart", email = "david.brochart@gmail.com" },
 ]
 keywords = [
-    "ipywidgets",
+    "widgets",
     "jupyter",
     "ypy",
     "yjs",
@@ -21,7 +21,6 @@ keywords = [
 dependencies = [
     "comm >=0.1.2",
     "y-py >=0.5.5",
-    "textual >=0.11",
 ]
 
 [project.urls]
@@ -39,7 +38,3 @@ path = "ypywidgets/__init__.py"
 include = [
     "/ypywidgets",
 ]
-
-[project.entry-points.ypywidgets]
-switch = "ypywidgets.switch:Switch"
-txl_switch = "ypywidgets.txl.switch:Switch"
