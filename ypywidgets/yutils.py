@@ -1,4 +1,3 @@
-import asyncio
 from enum import IntEnum
 from typing import Optional
 
@@ -92,10 +91,6 @@ class Decoder:
         if message is None:
             return ""
         return message.decode("utf-8")
-
-
-def put_updates(update_queue: asyncio.Queue, event: Y.AfterTransactionEvent) -> None:
-    update_queue.put_nowait(event.get_update())
 
 
 def process_sync_message(message: bytes, ydoc: Y.YDoc, comm) -> None:

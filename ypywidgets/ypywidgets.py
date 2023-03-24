@@ -1,5 +1,3 @@
-import asyncio
-from functools import partial
 from typing import Dict, Optional
 from uuid import uuid4
 
@@ -11,7 +9,6 @@ from .yutils import (
     YSyncMessageType,
     create_update_message,
     process_sync_message,
-    put_updates,
     sync,
 )
 
@@ -25,10 +22,8 @@ class Widget:
         comm_metadata: Optional[Dict] = None,
     ) -> None:
         self.name = name
-        self._update_queue = asyncio.Queue()
         self.ydoc = Y.YDoc()
         if open_comm:
-            self.synced = asyncio.Event()
             self.comm_id = uuid4().hex
             self.comm = create_comm(
                 comm_id=self.comm_id,
@@ -38,7 +33,6 @@ class Widget:
             )
             self.comm.on_msg(self._receive)
             sync(self.ydoc, self.comm)
-            asyncio.create_task(self._send())
 
     def _repr_mimebundle_(self, **kwargs):
         plaintext = repr(self)
@@ -59,14 +53,9 @@ class Widget:
         if message[0] == YMessageType.SYNC:
             process_sync_message(message[1:], self.ydoc, self.comm)
             if message[1] == YSyncMessageType.SYNC_STEP2:
-                self.synced.set()
+                self.ydoc.observe_after_transaction(self._send)
 
-    async def _send(self):
-        await self.synced.wait()
-        self.ydoc.observe_after_transaction(
-            partial(put_updates, self._update_queue)
-        )
-        while True:
-            update = await self._update_queue.get()
-            message = create_update_message(update)
-            self.comm.send(buffers=[message])
+    def _send(self, event: Y.AfterTransactionEvent):
+        update = event.get_update()
+        message = create_update_message(update)
+        self.comm.send(buffers=[message])
