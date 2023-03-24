@@ -1,8 +1,8 @@
 from typing import Dict, Optional
 from uuid import uuid4
 
+import comm
 import y_py as Y
-from comm import create_comm
 
 from .yutils import (
     YMessageType,
@@ -25,7 +25,7 @@ class Widget:
         self.ydoc = Y.YDoc()
         if open_comm:
             self.comm_id = uuid4().hex
-            self.comm = create_comm(
+            self.comm = comm.create_comm(
                 comm_id=self.comm_id,
                 target_name=self.name,
                 data=comm_data,
@@ -51,7 +51,7 @@ class Widget:
     def _receive(self, msg):
         message = bytes(msg["buffers"][0])
         if message[0] == YMessageType.SYNC:
-            process_sync_message(message[1:], self.ydoc, self.comm)
+            process_sync_message(message[1:], self.ydoc, self.comm.send)
             if message[1] == YSyncMessageType.SYNC_STEP2:
                 self.ydoc.observe_after_transaction(self._send)
 

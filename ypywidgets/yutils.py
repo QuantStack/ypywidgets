@@ -93,14 +93,14 @@ class Decoder:
         return message.decode("utf-8")
 
 
-def process_sync_message(message: bytes, ydoc: Y.YDoc, comm) -> None:
+def process_sync_message(message: bytes, ydoc: Y.YDoc, send_callback) -> None:
     message_type = message[0]
     msg = message[1:]
     if message_type == YSyncMessageType.SYNC_STEP1:
         state = read_message(msg)
         update = Y.encode_state_as_update(ydoc, state)
         reply = create_sync_step2_message(update)
-        comm.send(buffers=[reply])
+        send_callback(buffers=[reply])
     elif message_type in (
         YSyncMessageType.SYNC_STEP2,
         YSyncMessageType.SYNC_UPDATE,

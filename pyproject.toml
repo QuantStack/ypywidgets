@@ -27,6 +27,11 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/davidbrochart/ypywidgets"
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
 [tool.hatch.version]
 path = "ypywidgets/__init__.py"
 
