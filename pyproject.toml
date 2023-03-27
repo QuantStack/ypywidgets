@@ -29,6 +29,7 @@ Homepage = "https://github.com/davidbrochart/ypywidgets"
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-asyncio",
 ]
 
 [tool.hatch.version]
