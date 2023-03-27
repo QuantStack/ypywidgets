@@ -23,7 +23,7 @@ class Widget:
     ) -> None:
         self._name = name
         self._ydoc = Y.YDoc()
-        self._attrs = self._ydoc.get_map("attrs")
+        self._attrs = self._ydoc.get_map("_attrs")
         self._comm = None
         if primary:
             self._comm_id = uuid4().hex
