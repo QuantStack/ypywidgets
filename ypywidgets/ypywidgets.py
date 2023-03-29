@@ -24,6 +24,7 @@ class Widget:
         self._name = name
         self._ydoc = Y.YDoc()
         self._attrs = self._ydoc.get_map("_attrs")
+        self._attrs.observe(self._set_attr)
         self._comm = None
         if primary:
             self._comm_id = uuid4().hex
@@ -37,18 +38,11 @@ class Widget:
             msg = sync(self._ydoc)
             self._comm.send(**msg)
 
-    def __setattr__(self, k, v):
-        if k.startswith("_"):
-            self.__dict__[k] = v
-        else:
-            with self._ydoc.begin_transaction() as t:
-                self._attrs.set(t, k, v)
-
-    def __getattr__(self, k):
-        if k.startswith("_"):
-            return self.__getattribute__(k)
-
-        return self._attrs[k]
+    def _set_attr(self, event):
+        for k, v in event.keys.items():
+            new_value = v["newValue"]
+            if getattr(self, k) != new_value:
+                setattr(self, k, new_value)
 
     def _repr_mimebundle_(self, **kwargs):
         plaintext = repr(self)

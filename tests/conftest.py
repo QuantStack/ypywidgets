@@ -39,9 +39,14 @@ comm.create_comm = MockComm
 
 
 @pytest.fixture
-async def synced_widgets():
-    local_widget = Widget("my_widget")
-    remote_widget_manager = RemoteWidgetManager(local_widget._comm)
+def widget_factories():
+    return Widget, Widget
+
+
+@pytest.fixture
+async def synced_widgets(widget_factories):
+    local_widget = widget_factories[0]("my_widget")
+    remote_widget_manager = RemoteWidgetManager(widget_factories[1], local_widget._comm)
     remote_widget = await remote_widget_manager.get_widget()
     return local_widget, remote_widget
 
@@ -51,7 +56,8 @@ class RemoteWidgetManager:
     comm: Optional[MockComm]
     widget: Optional[Widget]
 
-    def __init__(self, comm):
+    def __init__(self, widget_factory, comm):
+        self.widget_factory = widget_factory
         self.comm = comm
         self.widget = None
         self.receive_task = asyncio.create_task(self.receive())
@@ -65,7 +71,7 @@ class RemoteWidgetManager:
         while True:
             msg_type, data, metadata, buffers, target_name, target_module = await self.comm.send_queue.get()
             if msg_type == "comm_open":
-                self.widget = Widget(target_name, primary=False)
+                self.widget = self.widget_factory(target_name, primary=False)
                 msg = sync(self.widget._ydoc)
                 self.comm.handle_msg(msg)
             elif msg_type == "comm_msg":
