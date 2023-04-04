@@ -45,7 +45,7 @@ def widget_factories():
 
 @pytest.fixture
 async def synced_widgets(widget_factories):
-    local_widget = widget_factories[0]("my_widget")
+    local_widget = widget_factories[0]()
     remote_widget_manager = RemoteWidgetManager(widget_factories[1], local_widget._comm)
     remote_widget = await remote_widget_manager.get_widget()
     return local_widget, remote_widget
@@ -71,7 +71,7 @@ class RemoteWidgetManager:
         while True:
             msg_type, data, metadata, buffers, target_name, target_module = await self.comm.send_queue.get()
             if msg_type == "comm_open":
-                self.widget = self.widget_factory(target_name, primary=False)
+                self.widget = self.widget_factory(primary=False)
                 msg = sync(self.widget._ydoc)
                 self.comm.handle_msg(msg)
             elif msg_type == "comm_msg":
