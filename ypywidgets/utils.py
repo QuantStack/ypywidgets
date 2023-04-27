@@ -93,15 +93,17 @@ class Decoder:
         return message.decode("utf-8")
 
 
-def process_sync_message(message: bytes, ydoc: Y.YDoc, send_callback) -> None:
+def process_sync_message(message: bytes, ydoc: Y.YDoc) -> Optional[bytes]:
     message_type = message[0]
     msg = message[1:]
+
     if message_type == YSyncMessageType.SYNC_STEP1:
         state = read_message(msg)
         update = Y.encode_state_as_update(ydoc, state)
         reply = create_sync_step2_message(update)
-        send_callback(buffers=[reply])
-    elif message_type in (
+        return reply
+
+    if message_type in (
         YSyncMessageType.SYNC_STEP2,
         YSyncMessageType.SYNC_UPDATE,
     ):
@@ -110,8 +112,10 @@ def process_sync_message(message: bytes, ydoc: Y.YDoc, send_callback) -> None:
         if update != b"\x00\x00":
             Y.apply_update(ydoc, update)
 
+    return None
 
-def sync(ydoc: Y.YDoc, comm):
+
+def sync(ydoc: Y.YDoc):
     state = Y.encode_state_vector(ydoc)
     msg = create_sync_step1_message(state)
-    comm.send(buffers=[msg])
+    return {"buffers": [msg]}
