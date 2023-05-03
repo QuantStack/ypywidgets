@@ -15,19 +15,29 @@ from .utils import (
 
 class Widget:
 
+    _attrs: Optional[Y.YMap]
+
     def __init__(
         self,
         primary: bool = True,
         comm_data: Optional[Dict] = None,
         comm_metadata: Optional[Dict] = None,
+        ydoc: Optional[Y.YDoc] = None,
     ) -> None:
-        self._ydoc = Y.YDoc()
-        self._attrs = self._ydoc.get_map("_attrs")
-        self._attrs.observe(self._set_attr)
+        if ydoc:
+            self._ydoc = ydoc
+            self._attrs = None
+        else:
+            self._ydoc = Y.YDoc()
+            self._attrs = self._ydoc.get_map("_attrs")
+            self._attrs.observe(self._set_attr)
         self._comm = None
         if primary:
             if comm_metadata is None:
-                comm_metadata = {"ymodel_name": self.__class__.__name__}
+                comm_metadata = dict(
+                    ymodel_name=self.__class__.__name__,
+                    create_ydoc=not bool(ydoc),
+                )
             self._comm_id = uuid4().hex
             self._comm = comm.create_comm(
                 comm_id=self._comm_id,

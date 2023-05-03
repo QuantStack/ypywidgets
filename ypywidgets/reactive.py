@@ -5,6 +5,9 @@ from reacttrs.reactive import Reactive, ReactiveType
 
 
 def set_attr(obj, name, value):
+    if obj._attrs is None:
+        return
+
     try:
         with obj._ydoc.begin_transaction() as t:
             obj._attrs.set(t, name, value)
