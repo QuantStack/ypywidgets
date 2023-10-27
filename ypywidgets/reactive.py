@@ -9,9 +9,8 @@ def set_attr(obj, name, value):
         return
 
     try:
-        with obj._ydoc.begin_transaction() as t:
-            obj._attrs.set(t, name, value)
-    except:
+        obj._attrs[name] = value
+    except RuntimeError:
         # Already mutably borrowed
         pass
 

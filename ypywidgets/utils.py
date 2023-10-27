@@ -1,7 +1,7 @@
 from enum import IntEnum
 from typing import Optional
 
-import y_py as Y
+from pycrdt import Doc
 
 
 class YMessageType(IntEnum):
@@ -93,13 +93,13 @@ class Decoder:
         return message.decode("utf-8")
 
 
-def process_sync_message(message: bytes, ydoc: Y.YDoc) -> Optional[bytes]:
+def process_sync_message(message: bytes, ydoc: Doc) -> Optional[bytes]:
     message_type = message[0]
     msg = message[1:]
 
     if message_type == YSyncMessageType.SYNC_STEP1:
         state = read_message(msg)
-        update = Y.encode_state_as_update(ydoc, state)
+        update = ydoc.get_update(state)
         reply = create_sync_step2_message(update)
         return reply
 
@@ -108,14 +108,14 @@ def process_sync_message(message: bytes, ydoc: Y.YDoc) -> Optional[bytes]:
         YSyncMessageType.SYNC_UPDATE,
     ):
         update = read_message(msg)
-        # Ignore empty updates (see https://github.com/y-crdt/ypy/issues/98)
+        # Ignore empty updates
         if update != b"\x00\x00":
-            Y.apply_update(ydoc, update)
+            ydoc.apply_update(update)
 
     return None
 
 
-def sync(ydoc: Y.YDoc):
-    state = Y.encode_state_vector(ydoc)
+def sync(ydoc: Doc):
+    state = ydoc.get_state()
     msg = create_sync_step1_message(state)
     return {"buffers": [msg]}
