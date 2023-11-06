@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 
 import pytest
+from pycrdt import Text
 from ypywidgets import Widget, reactive
 
 
@@ -22,12 +23,13 @@ class Widget2(Widget):
 async def test_create_ydoc(synced_widgets):
     local_widget, remote_widget = await synced_widgets
 
-    local_text = local_widget._ydoc.get_text("text")
+    local_text = Text()
+    local_widget._ydoc["text"] = local_text
     text = "hello world!"
-    with local_widget._ydoc.begin_transaction() as t:
-        local_text.extend(t, text)
+    local_text += text
 
-    remote_text = remote_widget._ydoc.get_text("text")
+    remote_text = Text()
+    remote_widget._ydoc["text"] = remote_text
     await asyncio.sleep(0.01)
     assert str(remote_text) == text
 

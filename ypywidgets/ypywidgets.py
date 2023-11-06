@@ -1,8 +1,7 @@
 from typing import Dict, Optional
-from uuid import uuid4
 
 import comm
-import y_py as Y
+from pycrdt import Doc, Map, Text, TransactionEvent
 
 from .utils import (
     YMessageType,
@@ -15,39 +14,52 @@ from .utils import (
 
 class Widget:
 
-    _attrs: Optional[Y.YMap]
+    _attrs: Optional[Map]
 
     def __init__(
         self,
         primary: bool = True,
         comm_data: Optional[Dict] = None,
         comm_metadata: Optional[Dict] = None,
-        ydoc: Optional[Y.YDoc] = None,
+        comm_id: Optional[str] = None,
+        ydoc: Optional[Doc] = None,
     ) -> None:
         if ydoc:
             self._ydoc = ydoc
             self._attrs = None
+            create_ydoc = False
         else:
-            self._ydoc = Y.YDoc()
-            self._attrs = self._ydoc.get_map("_attrs")
+            self._ydoc = Doc()
+            self._attrs = Map()
+            model_name = Text()
+            self._ydoc["_attrs"] = self._attrs
+            self._ydoc["_model_name"] = model_name
             self._attrs.observe(self._set_attr)
+            create_ydoc = True
+        if comm_id is None:
+            comm_id = self._ydoc.guid
         self._comm = None
         if primary:
+            model_name += self.__class__.__name__
             if comm_metadata is None:
                 comm_metadata = dict(
                     ymodel_name=self.__class__.__name__,
-                    create_ydoc=not bool(ydoc),
+                    create_ydoc=create_ydoc,
                 )
-            self._comm_id = uuid4().hex
+            self._comm_id = comm_id
             self._comm = comm.create_comm(
                 comm_id=self._comm_id,
                 target_name="ywidget",
                 data=comm_data,
                 metadata=comm_metadata,
             )
-            self._comm.on_msg(self._receive)
             msg = sync(self._ydoc)
             self._comm.send(**msg)
+            self._comm.on_msg(self._receive)
+
+    @property
+    def ydoc(self) -> Doc:
+        return self._ydoc
 
     def _set_attr(self, event):
         for k, v in event.keys.items():
@@ -76,9 +88,9 @@ class Widget:
             if reply:
                 self._comm.send(buffers=[reply])
             if message[1] == YSyncMessageType.SYNC_STEP2:
-                self._ydoc.observe_after_transaction(self._send)
+                self._ydoc.observe(self._send)
 
-    def _send(self, event: Y.AfterTransactionEvent):
+    def _send(self, event: TransactionEvent):
         update = event.get_update()
         message = create_update_message(update)
         self._comm.send(buffers=[message])

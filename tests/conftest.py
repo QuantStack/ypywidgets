@@ -4,7 +4,7 @@ from typing import Optional
 
 import comm
 import pytest
-import y_py as Y
+from pycrdt import TransactionEvent
 from ypywidgets import Widget
 from ypywidgets.utils import YMessageType, YSyncMessageType, create_update_message, process_sync_message, sync
 
@@ -62,7 +62,7 @@ class RemoteWidgetManager:
         self.widget = None
         self.receive_task = asyncio.create_task(self.receive())
 
-    def send(self, event: Y.AfterTransactionEvent):
+    def send(self, event: TransactionEvent):
         update = event.get_update()
         message = create_update_message(update)
         self.comm.recv_queue.put_nowait({"buffers": [message]})
@@ -81,7 +81,7 @@ class RemoteWidgetManager:
                     if reply:
                         self.comm.handle_msg({"buffers": [reply]})
                     if message[1] == YSyncMessageType.SYNC_STEP2:
-                        self.widget._ydoc.observe_after_transaction(self.send)
+                        self.widget._ydoc.observe(self.send)
 
     async def get_widget(self, timeout=0.1):
         t = time.monotonic()
