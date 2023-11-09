@@ -3,16 +3,17 @@ import asyncio
 
 import pytest
 from pycrdt import Text
-from ypywidgets import Widget, reactive
+from ypywidgets import reactive
+from ypywidgets.comm import CommWidget
 
 
-class Widget1(Widget):
+class Widget1(CommWidget):
     foo = reactive("foo1")
     bar = reactive("bar1")
     baz: reactive[str | None] = reactive(None)
 
 
-class Widget2(Widget):
+class Widget2(CommWidget):
     foo = reactive("")
 
     def watch_foo(self, old, new):

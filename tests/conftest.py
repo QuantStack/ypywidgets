@@ -6,6 +6,7 @@ import comm
 import pytest
 from pycrdt import TransactionEvent
 from ypywidgets import Widget
+from ypywidgets.comm import CommWidget
 from ypywidgets.utils import YMessageType, YSyncMessageType, create_update_message, process_sync_message, sync
 
 
@@ -40,7 +41,7 @@ comm.create_comm = MockComm
 
 @pytest.fixture
 def widget_factories():
-    return Widget, Widget
+    return CommWidget, Widget
 
 
 @pytest.fixture
@@ -71,7 +72,7 @@ class RemoteWidgetManager:
         while True:
             msg_type, data, metadata, buffers, target_name, target_module = await self.comm.send_queue.get()
             if msg_type == "comm_open":
-                self.widget = self.widget_factory(primary=False)
+                self.widget = self.widget_factory()
                 msg = sync(self.widget._ydoc)
                 self.comm.handle_msg(msg)
             elif msg_type == "comm_msg":
