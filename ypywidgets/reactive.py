@@ -5,9 +5,6 @@ from reacttrs.reactive import Reactive, ReactiveType
 
 
 def set_attr(obj, name, value):
-    if obj._attrs is None:
-        return
-
     try:
         obj._attrs[name] = value
     except RuntimeError:
