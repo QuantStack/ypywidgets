@@ -13,7 +13,7 @@ from .utils import (
 from .widget import Widget
 
 
-class CommWidget(Widget):
+class CommWidget:
 
     def __init__(
         self,
@@ -22,23 +22,23 @@ class CommWidget(Widget):
         comm_id: str | None = None,
         ydoc: Doc | None = None,
     ) -> None:
-        super().__init__(ydoc)
+        self.ydoc = Doc() if ydoc is None else ydoc
         model_name = self.__class__.__name__
-        _model_name = self._ydoc["_model_name"] = Text()
+        _model_name = self.ydoc["_model_name"] = Text()
         _model_name += model_name
         if comm_metadata is None:
             comm_metadata = dict(
                 ymodel_name=model_name,
                 create_ydoc=not ydoc,
             )
-        self._comm_id = self._ydoc.guid if comm_id is None else comm_id
+        self._comm_id = self.ydoc.guid if comm_id is None else comm_id
         self._comm = comm.create_comm(
             comm_id=self._comm_id,
             target_name="ywidget",
             data=comm_data,
             metadata=comm_metadata,
         )
-        msg = sync(self._ydoc)
+        msg = sync(self.ydoc)
         self._comm.send(**msg)
         self._comm.on_msg(self._receive)
 
@@ -59,13 +59,25 @@ class CommWidget(Widget):
     def _receive(self, msg):
         message = bytes(msg["buffers"][0])
         if message[0] == YMessageType.SYNC:
-            reply = process_sync_message(message[1:], self._ydoc)
+            reply = process_sync_message(message[1:], self.ydoc)
             if reply:
                 self._comm.send(buffers=[reply])
             if message[1] == YSyncMessageType.SYNC_STEP2:
-                self._ydoc.observe(self._send)
+                self.ydoc.observe(self._send)
 
     def _send(self, event: TransactionEvent):
         update = event.get_update()
         message = create_update_message(update)
         self._comm.send(buffers=[message])
+
+
+class CommWidgetWithAttrs(CommWidget, Widget):
+    def __init__(
+        self,
+        comm_data: dict | None = None,
+        comm_metadata: dict | None = None,
+        comm_id: str | None = None,
+        ydoc: Doc | None = None,
+    ) -> None:
+        Widget.__init__(self, ydoc)
+        CommWidget.__init__(self, comm_data, comm_metadata, comm_id, self.ydoc)

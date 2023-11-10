@@ -4,16 +4,16 @@ import asyncio
 import pytest
 from pycrdt import Text
 from ypywidgets import reactive
-from ypywidgets.comm import CommWidget
+from ypywidgets.comm import CommWidgetWithAttrs
 
 
-class Widget1(CommWidget):
+class Widget1(CommWidgetWithAttrs):
     foo = reactive("foo1")
     bar = reactive("bar1")
     baz: reactive[str | None] = reactive(None)
 
 
-class Widget2(CommWidget):
+class Widget2(CommWidgetWithAttrs):
     foo = reactive("")
 
     def watch_foo(self, old, new):
@@ -25,12 +25,12 @@ async def test_create_ydoc(synced_widgets):
     local_widget, remote_widget = await synced_widgets
 
     local_text = Text()
-    local_widget._ydoc["text"] = local_text
+    local_widget.ydoc["text"] = local_text
     text = "hello world!"
     local_text += text
 
     remote_text = Text()
-    remote_widget._ydoc["text"] = remote_text
+    remote_widget.ydoc["text"] = remote_text
     await asyncio.sleep(0.01)
     assert str(remote_text) == text
 
