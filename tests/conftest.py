@@ -6,7 +6,7 @@ import comm
 import pytest
 from pycrdt import TransactionEvent
 from ypywidgets import Widget
-from ypywidgets.comm import CommWidgetWithAttrs
+from ypywidgets.comm import CommWidget
 from ypywidgets.utils import YMessageType, YSyncMessageType, create_update_message, process_sync_message, sync
 
 
@@ -41,7 +41,7 @@ comm.create_comm = MockComm
 
 @pytest.fixture
 def widget_factories():
-    return CommWidgetWithAttrs, Widget
+    return CommWidget, Widget
 
 
 @pytest.fixture
