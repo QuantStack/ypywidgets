@@ -16,6 +16,8 @@ class Widget:
         self.ydoc["_attrs"] = self._attrs = Map()
         self.ydoc["_model_name"] = Text()
         self._attrs.observe(self._set_attr)
+        for k, v in self._attrs.items():
+            setattr(self, k, v)
 
     def _set_attr(self, event):
         for k, v in event.keys.items():
