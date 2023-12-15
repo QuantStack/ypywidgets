@@ -64,7 +64,7 @@ class RemoteWidgetManager:
         self.receive_task = asyncio.create_task(self.receive())
 
     def send(self, event: TransactionEvent):
-        update = event.get_update()
+        update = event.update
         message = create_update_message(update)
         self.comm.recv_queue.put_nowait({"buffers": [message]})
 
