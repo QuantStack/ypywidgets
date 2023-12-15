@@ -19,7 +19,7 @@ keywords = [
 ]
 dependencies = [
     "comm >=0.1.4,<1",
-    "pycrdt >=0.5.0,<0.6.0",
+    "pycrdt >=0.7.2,<0.8.0",
     "reacttrs >=0.1.4,<1",
 ]
 

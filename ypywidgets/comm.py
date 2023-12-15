@@ -49,7 +49,7 @@ class CommProvider:
                 self._ydoc.observe(self._send)
 
     def _send(self, event: TransactionEvent):
-        update = event.get_update()
+        update = event.update
         message = create_update_message(update)
         self._comm.send(buffers=[message])
 
