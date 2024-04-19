@@ -1,22 +1,23 @@
-from __future__ import annotations
 import asyncio
+from typing import Optional
 
 import pytest
 from pycrdt import Text
-from ypywidgets import reactive
+from ypywidgets import Declare
 from ypywidgets.comm import CommWidget
 
 
 class Widget1(CommWidget):
-    foo = reactive("foo1")
-    bar = reactive("bar1")
-    baz: reactive[str | None] = reactive(None)
+    foo = Declare[str]("foo1")
+    bar = Declare[str]("bar1")
+    baz = Declare[Optional[str]](None)
 
 
 class Widget2(CommWidget):
-    foo = reactive("")
+    foo = Declare[str]("")
 
-    def watch_foo(self, old, new):
+    @foo.watch
+    def _watch_foo(self, old, new):
         print(f"foo changed: '{old}'->'{new}'")
 
 
@@ -67,4 +68,4 @@ async def test_watch_attribute(widget_factories, synced_widgets, capfd):
     # we're seeing the remote widget watch callback
     await asyncio.sleep(0.01)
     out, err = capfd.readouterr()
-    assert out == "foo changed: ''->''\nfoo changed: ''->'foo'\n"
+    assert out == "foo changed: ''->'foo'\n"
