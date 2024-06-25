@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import comm
-from pycrdt import Doc, Text, TransactionEvent
-
-from .utils import (
+from pycrdt import (
+    Doc,
+    Text,
+    TransactionEvent,
     YMessageType,
     YSyncMessageType,
+    create_sync_message,
     create_update_message,
-    process_sync_message,
-    sync,
+    handle_sync_message,
 )
+
 from .widget import Widget
 
 
@@ -35,15 +37,15 @@ class CommProvider:
     ) -> None:
         self._ydoc = ydoc
         self._comm = comm
-        msg = sync(ydoc)
-        self._comm.send(**msg)
+        msg = create_sync_message(ydoc)
+        self._comm.send(buffers=[msg])
         self._comm.on_msg(self._receive)
 
     def _receive(self, msg):
         message = bytes(msg["buffers"][0])
         if message[0] == YMessageType.SYNC:
-            reply = process_sync_message(message[1:], self._ydoc)
-            if reply:
+            reply = handle_sync_message(message[1:], self._ydoc)
+            if reply is not None:
                 self._comm.send(buffers=[reply])
             if message[1] == YSyncMessageType.SYNC_STEP2:
                 self._ydoc.observe(self._send)

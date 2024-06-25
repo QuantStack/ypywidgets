@@ -4,10 +4,16 @@ from typing import Optional
 
 import comm
 import pytest
-from pycrdt import TransactionEvent
+from pycrdt import (
+    YMessageType,
+    YSyncMessageType,
+    TransactionEvent,
+    create_sync_message,
+    create_update_message,
+    handle_sync_message,
+)
 from ypywidgets import Widget
 from ypywidgets.comm import CommWidget
-from ypywidgets.utils import YMessageType, YSyncMessageType, create_update_message, process_sync_message, sync
 
 
 class MockComm(comm.base_comm.BaseComm):
@@ -73,13 +79,13 @@ class RemoteWidgetManager:
             msg_type, data, metadata, buffers, target_name, target_module = await self.comm.send_queue.get()
             if msg_type == "comm_open":
                 self.widget = self.widget_factory()
-                msg = sync(self.widget.ydoc)
-                self.comm.handle_msg(msg)
+                msg = create_sync_message(self.widget.ydoc)
+                self.comm.handle_msg({"buffers": [msg]})
             elif msg_type == "comm_msg":
                 message = buffers[0]
                 if message[0] == YMessageType.SYNC:
-                    reply = process_sync_message(message[1:], self.widget.ydoc)
-                    if reply:
+                    reply = handle_sync_message(message[1:], self.widget.ydoc)
+                    if reply is not None:
                         self.comm.handle_msg({"buffers": [reply]})
                     if message[1] == YSyncMessageType.SYNC_STEP2:
                         self.widget.ydoc.observe(self.send)
