@@ -39,3 +39,7 @@ path = "ypywidgets/__init__.py"
 include = [
     "/ypywidgets",
 ]
+
+[tool.hatch.build.targets.wheel]
+ignore-vcs = true
+packages = ["ypywidgets"]
