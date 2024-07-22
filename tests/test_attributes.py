@@ -3,18 +3,18 @@ from typing import Optional
 
 import pytest
 from pycrdt import Text
-from ypywidgets import Declare
+from ypywidgets import Reactive
 from ypywidgets.comm import CommWidget
 
 
 class Widget1(CommWidget):
-    foo = Declare[str]("foo1")
-    bar = Declare[str]("bar1")
-    baz = Declare[Optional[str]](None)
+    foo = Reactive[str]("foo1")
+    bar = Reactive[str]("bar1")
+    baz = Reactive[Optional[str]](None)
 
 
 class Widget2(CommWidget):
-    foo = Declare[str]("")
+    foo = Reactive[str]("")
 
     @foo.watch
     def _watch_foo(self, old, new):
