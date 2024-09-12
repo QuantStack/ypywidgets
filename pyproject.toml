@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ypywidgets"
-dynamic = ["version"]
+version = "0.9.0"
 description = "Y-based Jupyter widgets for Python"
 readme = "README.md"
 license = "MIT"
@@ -31,15 +31,3 @@ dev = [
     "pytest",
     "pytest-asyncio",
 ]
-
-[tool.hatch.version]
-path = "ypywidgets/__init__.py"
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "/ypywidgets",
-]
-
-[tool.hatch.build.targets.wheel]
-ignore-vcs = true
-packages = ["ypywidgets"]
