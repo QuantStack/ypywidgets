@@ -28,6 +28,8 @@ Homepage = "https://github.com/davidbrochart/ypywidgets"
 
 [project.optional-dependencies]
 dev = [
+    "coverage >=7.0.0,<8.0.0",
+    "mypy",
     "pytest",
     "pytest-asyncio",
 ]
@@ -35,3 +37,9 @@ dev = [
 [tool.hatch.build.targets.wheel]
 ignore-vcs = true
 packages = ["src/ypywidgets"]
+
+[tool.coverage.run]
+source = ["src/ypywidgets", "tests"]
+
+[tool.coverage.report]
+show_missing = true
