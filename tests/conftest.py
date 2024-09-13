@@ -96,5 +96,5 @@ class RemoteWidgetManager:
             if self.widget:
                 return self.widget
             await asyncio.sleep(0)
-            if time.monotonic() - t > timeout:
+            if time.monotonic() - t > timeout:  # pragma: nocover
                 raise TimeoutError("Timeout waiting for widget")

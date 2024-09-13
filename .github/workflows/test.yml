@@ -34,9 +34,16 @@ jobs:
       run: python3 -m pip install --upgrade pip
 
     - name: Install ypywidgets in dev mode
-      run: |
-        pip install .[dev]
+      run: pip install -e ".[dev]"
+
+    - name: Check types
+      run: mypy src
 
     - name: Run tests
+      run: pytest ./tests -v --color=yes
+
+    - name: Run code coverage
+      if: ${{ (matrix.python-version == '3.12') && (matrix.os == 'ubuntu-latest') }}
       run: |
-        pytest ./tests -v --color=yes
+        coverage run -m pytest tests
+        coverage report --fail-under=100

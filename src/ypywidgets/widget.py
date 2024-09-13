@@ -9,14 +9,14 @@ class Widget:
     ydoc: Doc
 
     def __init__(self, ydoc: Doc | None = None) -> None:
-        if self._initialized:
+        if self._initialized:  # pragma: nocover
             return
         self._initialized = True
         self.ydoc = Doc() if ydoc is None else ydoc
         self.ydoc["_attrs"] = self._attrs = Map()
         self.ydoc["_model_name"] = Text()
         self._attrs.observe(self._set_attr)
-        for k, v in self._attrs.items():
+        for k, v in self._attrs.items():  # pragma: nocover
             setattr(self, k, v)
 
     def _set_attr(self, event):

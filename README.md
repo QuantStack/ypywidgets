@@ -1,4 +1,5 @@
 [![Build Status](https://github.com/QuantStack/ypywidgets/workflows/test/badge.svg)](https://github.com/QuantStack/ypywidgets/actions)
+[![Code Coverage](https://img.shields.io/badge/coverage-100%25-green)](https://img.shields.io/badge/coverage-100%25-green)
 
 # ypywidgets: Y-based Jupyter widgets for Python
 
