@@ -31,3 +31,7 @@ dev = [
     "pytest",
     "pytest-asyncio",
 ]
+
+[tool.hatch.build.targets.wheel]
+ignore-vcs = true
+packages = ["src/ypywidgets"]
