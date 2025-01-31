@@ -15,6 +15,17 @@ from pycrdt import (
 from .widget import Widget
 
 
+def handle_comm_opened(*args, **kwargs):
+    # TODO handle comm open from front-end
+    pass
+
+
+def register_comm_target():
+    comm_manager = comm.get_comm_manager()
+    if comm_manager is not None:
+        comm_manager.register_target('ywidget', handle_comm_opened)
+
+
 def create_widget_comm(
     data: dict | None = None,
     metadata: dict | None = None,
