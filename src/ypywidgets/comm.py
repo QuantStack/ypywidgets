@@ -87,7 +87,7 @@ class CommWidget(Widget):
         self._comm = create_widget_comm(comm_data, comm_metadata, comm_id)
         CommProvider(self.ydoc, self._comm)
 
-    def _repr_mimebundle_(self, **kwargs):  # pragma: nocover
+    def _repr_mimebundle_(self, *args, **kwargs):  # pragma: nocover
         plaintext = repr(self)
         if len(plaintext) > 110:
             plaintext = plaintext[:110] + '…'
