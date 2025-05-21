@@ -23,7 +23,7 @@ class Widget2(CommWidget):
 
 @pytest.mark.asyncio
 async def test_create_ydoc(synced_widgets):
-    local_widget, remote_widget = await synced_widgets
+    local_widget, remote_widget = synced_widgets
 
     local_text = Text()
     local_widget.ydoc["text"] = local_text
@@ -39,7 +39,7 @@ async def test_create_ydoc(synced_widgets):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("widget_factories", ((Widget1, Widget1),))
 async def test_sync_attribute(widget_factories, synced_widgets):
-    local_widget, remote_widget = await synced_widgets
+    local_widget, remote_widget = synced_widgets
 
     with pytest.raises(AttributeError):
         assert local_widget.wrong_attr1
@@ -61,7 +61,7 @@ async def test_sync_attribute(widget_factories, synced_widgets):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("widget_factories", ((Widget1, Widget2),))
 async def test_watch_attribute(widget_factories, synced_widgets, capfd):
-    local_widget, remote_widget = await synced_widgets
+    local_widget, remote_widget = synced_widgets
 
     local_widget.foo = "foo"
 

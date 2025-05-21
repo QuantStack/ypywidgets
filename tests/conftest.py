@@ -1,18 +1,12 @@
+from __future__ import annotations
+
 import asyncio
 import time
-from typing import Optional
 
 import comm
 import pytest
-from pycrdt import (
-    YMessageType,
-    YSyncMessageType,
-    TransactionEvent,
-    create_sync_message,
-    create_update_message,
-    handle_sync_message,
-)
-from ypywidgets import Widget
+import pytest_asyncio
+from pycrdt import create_sync_message
 from ypywidgets.comm import CommWidget
 
 
@@ -47,10 +41,10 @@ comm.create_comm = MockComm
 
 @pytest.fixture
 def widget_factories():
-    return CommWidget, Widget
+    return CommWidget, CommWidget
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def synced_widgets(widget_factories):
     local_widget = widget_factories[0]()
     remote_widget_manager = RemoteWidgetManager(widget_factories[1], local_widget._comm)
@@ -60,35 +54,31 @@ async def synced_widgets(widget_factories):
 
 class RemoteWidgetManager:
 
-    comm: Optional[MockComm]
-    widget: Optional[Widget]
+    comm: MockComm
+    widget: CommWidget | None
 
-    def __init__(self, widget_factory, comm):
+    def __init__(self, widget_factory, local_comm):
         self.widget_factory = widget_factory
-        self.comm = comm
+        self.local_comm = local_comm
         self.widget = None
         self.receive_task = asyncio.create_task(self.receive())
 
-    def send(self, event: TransactionEvent):
-        update = event.update
-        message = create_update_message(update)
-        self.comm.recv_queue.put_nowait({"buffers": [message]})
+    async def send(self):
+        while True:
+            msg_type, data, metadata, buffers, target_name, target_module = await self.widget._comm.send_queue.get()
+            if msg_type == "comm_msg":
+                self.local_comm.recv_queue.put_nowait({"buffers": buffers})
 
     async def receive(self):
         while True:
-            msg_type, data, metadata, buffers, target_name, target_module = await self.comm.send_queue.get()
+            msg_type, data, metadata, buffers, target_name, target_module = await self.local_comm.send_queue.get()
             if msg_type == "comm_open":
                 self.widget = self.widget_factory()
                 msg = create_sync_message(self.widget.ydoc)
-                self.comm.handle_msg({"buffers": [msg]})
+                self.local_comm.recv_queue.put_nowait({"buffers": [msg]})
+                self.send_task = asyncio.create_task(self.send())
             elif msg_type == "comm_msg":
-                message = buffers[0]
-                if message[0] == YMessageType.SYNC:
-                    reply = handle_sync_message(message[1:], self.widget.ydoc)
-                    if reply is not None:
-                        self.comm.handle_msg({"buffers": [reply]})
-                    if message[1] == YSyncMessageType.SYNC_STEP2:
-                        self.widget.ydoc.observe(self.send)
+                self.widget._comm.recv_queue.put_nowait({"buffers": buffers})
 
     async def get_widget(self, timeout=0.1):
         t = time.monotonic()
