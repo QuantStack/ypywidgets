@@ -20,7 +20,7 @@ jobs:
     - name: Create packages
       run: hatch build
     - name: Archive packages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: dist
         path: dist
