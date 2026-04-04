@@ -54,12 +54,13 @@ class CommProvider:
 
     def _receive(self, msg):
         message = bytes(msg["buffers"][0])
-        if message[0] == YMessageType.SYNC:
-            reply = handle_sync_message(message[1:], self._ydoc)
-            if reply is not None:
-                self._comm.send(buffers=[reply])
-            if message[1] == YSyncMessageType.SYNC_STEP2:
-                self._ydoc.observe(self._send)
+        match message[0]:
+            case YMessageType.SYNC:
+                reply = handle_sync_message(message[1:], self._ydoc)
+                if reply is not None:
+                    self._comm.send(buffers=[reply])
+                if message[1] == YSyncMessageType.SYNC_STEP2:
+                    self._ydoc.observe(self._send)
 
     def _send(self, event: TransactionEvent):
         update = event.update
@@ -69,12 +70,12 @@ class CommProvider:
 
 class CommWidget(Widget):
     def __init__(
-            self,
-            ydoc: Doc | None = None,
-            comm_data: dict | None = None,
-            comm_metadata: dict | None = None,
-            comm_id: str | None = None,
-        ):
+        self,
+        ydoc: Doc | None = None,
+        comm_data: dict | None = None,
+        comm_metadata: dict | None = None,
+        comm_id: str | None = None,
+    ):
         super().__init__(ydoc)
         model_name = self.__class__.__name__
         _model_name = self.ydoc["_model_name"] = Text()
@@ -90,13 +91,13 @@ class CommWidget(Widget):
     def _repr_mimebundle_(self, *args, **kwargs):  # pragma: nocover
         plaintext = repr(self)
         if len(plaintext) > 110:
-            plaintext = plaintext[:110] + '…'
+            plaintext = plaintext[:110] + "…"
         data = {
             "text/plain": plaintext,
             "application/vnd.jupyter.ywidget-view+json": {
                 "version_major": 2,
                 "version_minor": 0,
                 "model_id": self._comm.comm_id,
-            }
+            },
         }
         return data

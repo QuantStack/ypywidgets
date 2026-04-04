@@ -10,7 +10,6 @@ from .widget import Widget
 
 
 class Reactive(_Reactive, Generic[ValueType]):
-
     def __init__(
         self,
         default: ValueType,
