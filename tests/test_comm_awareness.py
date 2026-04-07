@@ -3,8 +3,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
-from anyio import sleep
-from pycrdt import Doc, Text, YMessageType, create_awareness_message
+from pycrdt import Doc, YMessageType, create_awareness_message
 
 from ypywidgets.comm import CommProvider, CommWidget
 
