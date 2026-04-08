@@ -112,7 +112,6 @@ class SyncedWidgets:
         self.local_widget_factory, self.remote_widget_factory = widget_factories
         self.local_widget: CommWidget | None = None
         self.remote_widget: Widget | None = None
-        self.remote_awareness: Awareness | None = None
         self.local_widget_created = Event()
         self.remote_widget_created = Event()
         context.add_task(self.receive)

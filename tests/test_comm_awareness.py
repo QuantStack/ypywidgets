@@ -1,73 +1,49 @@
 from __future__ import annotations
 
-from unittest.mock import patch
-
 import pytest
 from anyio import sleep
-from pycrdt import Doc, YMessageType, create_awareness_message
-
-from ypywidgets.comm import CommProvider, CommWidget
+from pycrdt import Awareness, Doc, YMessageType, create_awareness_message
 
 pytestmark = pytest.mark.anyio
 
 
-class DummyComm:
-    def __init__(self):
-        self.sent: list[bytes] = []
-        self._handler = None
+async def test_comm_provider_applies_awareness_frame(synced_widgets, context):
+    async with context:
+        local_widget = await synced_widgets.get_local_widget()
+        remote_awareness = Awareness(Doc())
+        remote_awareness.set_local_state({"role": "remote"})
+        payload = remote_awareness.encode_awareness_update([remote_awareness.client_id])
+        frame = create_awareness_message(payload)
 
-    def send(self, *, buffers=None, **kwargs):
-        if buffers:
-            self.sent.append(bytes(memoryview(buffers[0])))
+        assert frame[0] == YMessageType.AWARENESS
 
-    def on_msg(self, handler):
-        self._handler = handler
+        local_widget._comm_provider._receive({"buffers": [frame]})
 
-
-def test_comm_provider_applies_awareness_frame():
-    doc = Doc()
-    comm = DummyComm()
-    provider = CommProvider(doc, comm)
-
-    awareness = provider.awareness
-    awareness.set_local_state({"role": "tester"})
-    payload = awareness.encode_awareness_update([awareness.client_id])
-    frame = create_awareness_message(payload)
-
-    assert frame[0] == YMessageType.AWARENESS
-
-    provider._receive({"buffers": [frame]})
-
-    state = awareness.get_local_state()
-    assert state is not None
-    assert state.get("role") == "tester"
+        remote_state = local_widget.awareness.states.get(remote_awareness.client_id)
+        assert remote_state is not None
+        assert remote_state.get("role") == "remote"
 
 
-@patch("ypywidgets.comm.create_widget_comm")
-def test_comm_widget_exposes_provider_awareness(mock_create_comm):
-    comm = DummyComm()
-    mock_create_comm.return_value = comm
-
-    widget = CommWidget()
-    assert widget.awareness is widget._comm_provider.awareness
+async def test_comm_widget_exposes_provider_awareness(synced_widgets, context):
+    async with context:
+        widget = await synced_widgets.get_local_widget()
+        assert widget.awareness is widget._comm_provider.awareness
 
 
-@patch("ypywidgets.comm.create_widget_comm")
-def test_comm_widget_awareness_observe_and_unobserve(mock_create_comm):
-    comm = DummyComm()
-    mock_create_comm.return_value = comm
-    widget = CommWidget()
+async def test_comm_widget_awareness_observe_and_unobserve(synced_widgets, context):
+    async with context:
+        widget = await synced_widgets.get_local_widget()
 
-    events: list[str] = []
-    sub_id = widget.on_awareness_change(lambda topic, _: events.append(topic))
+        events: list[str] = []
+        sub_id = widget.awareness.observe(lambda topic, _: events.append(topic))
 
-    widget.awareness.set_local_state({"ping": 1})
-    assert events
+        widget.awareness.set_local_state({"ping": 1})
+        assert events
 
-    widget.unobserve_awareness(sub_id)
-    events.clear()
-    widget.awareness.set_local_state({"ping": 2})
-    assert events == []
+        widget.awareness.unobserve(sub_id)
+        events.clear()
+        widget.awareness.set_local_state({"ping": 2})
+        assert events == []
 
 
 async def test_remote_manager_applies_awareness_messages(synced_widgets, context):
