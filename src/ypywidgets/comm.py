@@ -11,6 +11,7 @@ from pycrdt import (
     create_sync_message,
     create_update_message,
     handle_sync_message,
+    read_message,
 )
 
 from .widget import Widget
@@ -67,6 +68,10 @@ class CommProvider:
                     self._comm.send(buffers=[reply])
                 if message[1] == YSyncMessageType.SYNC_STEP2:
                     self._ydoc.observe(self._send)
+            case YMessageType.AWARENESS:
+                # Same as pycrdt.websocket.yroom: strip Y message kind, decode body.
+                update = read_message(message[1:])
+                self._awareness.apply_awareness_update(update, None)
 
     def _send(self, event: TransactionEvent):
         update = event.update

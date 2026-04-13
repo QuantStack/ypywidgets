@@ -7,7 +7,7 @@ from ypywidgets.comm import CommWidget
 pytestmark = pytest.mark.anyio
 
 
-async def test_comm_provider_applies_awareness_frame(synced_widgets, context):
+async def test_comm_provider_applies_awareness_message(synced_widgets, context):
     async with context:
         local_widget = await synced_widgets.get_local_widget()
         remote_awareness = Awareness(Doc())
@@ -29,7 +29,7 @@ async def test_comm_widget_exposes_provider_awareness():
     assert widget.awareness is widget._comm_provider.awareness
 
 
-async def test_comm_widget_awareness_observe_and_unobserve(synced_widgets, context):
+async def test_comm_widget_awareness_observe_and_unobserve():
     widget = CommWidget()
 
     events: list[str] = []
