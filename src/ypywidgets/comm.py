@@ -11,7 +11,6 @@ from pycrdt import (
     create_sync_message,
     create_update_message,
     handle_sync_message,
-    read_message,
 )
 
 from .widget import Widget

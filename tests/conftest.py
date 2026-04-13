@@ -9,14 +9,12 @@ from anyio import Event, create_memory_object_stream, create_task_group, fail_af
 from anyio.abc import TaskGroup
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from pycrdt import (
-    Awareness,
     YMessageType,
     YSyncMessageType,
     TransactionEvent,
     create_sync_message,
     create_update_message,
     handle_sync_message,
-    read_message,
 )
 from ypywidgets import Widget
 from ypywidgets.comm import CommWidget
