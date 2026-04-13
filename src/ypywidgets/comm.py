@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import comm
 from pycrdt import (
+    Awareness,
     Doc,
     Text,
     TransactionEvent,
@@ -10,6 +11,7 @@ from pycrdt import (
     create_sync_message,
     create_update_message,
     handle_sync_message,
+    read_message,
 )
 
 from .widget import Widget
@@ -48,9 +50,14 @@ class CommProvider:
     ) -> None:
         self._ydoc = ydoc
         self._comm = comm
+        self._awareness = Awareness(ydoc)
         msg = create_sync_message(ydoc)
         self._comm.send(buffers=[msg])
         self._comm.on_msg(self._receive)
+
+    @property
+    def awareness(self) -> Awareness:
+        return self._awareness
 
     def _receive(self, msg):
         message = bytes(msg["buffers"][0])
@@ -61,6 +68,10 @@ class CommProvider:
                     self._comm.send(buffers=[reply])
                 if message[1] == YSyncMessageType.SYNC_STEP2:
                     self._ydoc.observe(self._send)
+            case YMessageType.AWARENESS:
+                # Same as pycrdt.websocket.yroom: strip Y message kind, decode body.
+                update = read_message(message[1:])
+                self._awareness.apply_awareness_update(update, None)
 
     def _send(self, event: TransactionEvent):
         update = event.update
@@ -86,7 +97,11 @@ class CommWidget(Widget):
                 create_ydoc=not ydoc,
             )
         self._comm = create_widget_comm(comm_data, comm_metadata, comm_id)
-        CommProvider(self.ydoc, self._comm)
+        self._comm_provider = CommProvider(self.ydoc, self._comm)
+
+    @property
+    def awareness(self) -> Awareness:
+        return self._comm_provider.awareness
 
     def _repr_mimebundle_(self, *args, **kwargs):  # pragma: nocover
         plaintext = repr(self)
