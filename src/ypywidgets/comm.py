@@ -8,6 +8,7 @@ from pycrdt import (
     TransactionEvent,
     YMessageType,
     YSyncMessageType,
+    create_awareness_message,
     create_sync_message,
     create_update_message,
     handle_sync_message,
@@ -51,6 +52,7 @@ class CommProvider:
         self._ydoc = ydoc
         self._comm = comm
         self._awareness = Awareness(ydoc)
+        self._awareness_sub_id = self._awareness.observe(self._send_awareness)
         msg = create_sync_message(ydoc)
         self._comm.send(buffers=[msg])
         self._comm.on_msg(self._receive)
@@ -58,6 +60,12 @@ class CommProvider:
     @property
     def awareness(self) -> Awareness:
         return self._awareness
+
+    # send awareness to the frontend
+    def _send_awareness(self, topic, data):
+        update = self._awareness.encode_awareness_update([self._awareness.client_id])
+        message = create_awareness_message(update)
+        self._comm.send(buffers=[message])
 
     def _receive(self, msg):
         message = bytes(msg["buffers"][0])

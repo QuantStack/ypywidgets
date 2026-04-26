@@ -42,3 +42,17 @@ async def test_comm_widget_awareness_observe_and_unobserve():
     events.clear()
     widget.awareness.set_local_state({"ping": 2})
     assert events == []
+
+
+async def test_comm_provider_sends_awareness_to_frontend(synced_widgets, context):
+    async with context:
+        local_widget = await synced_widgets.get_local_widget()
+
+        sent_messages = []
+        local_widget._comm_provider._comm.send = lambda buffers: sent_messages.append(
+            buffers[0]
+        )
+
+        local_widget.awareness.set_local_state({"role": "python-test"})
+
+        assert any(msg[0] == YMessageType.AWARENESS for msg in sent_messages)
