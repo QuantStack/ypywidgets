@@ -1,4 +1,5 @@
 import math
+import sys
 from contextlib import AsyncExitStack
 from functools import partial
 from typing import Any, cast
@@ -9,15 +10,22 @@ from anyio import Event, create_memory_object_stream, create_task_group, fail_af
 from anyio.abc import TaskGroup
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from pycrdt import (
+    TransactionEvent,
     YMessageType,
     YSyncMessageType,
-    TransactionEvent,
     create_sync_message,
     create_update_message,
     handle_sync_message,
 )
+
 from ypywidgets import Widget
 from ypywidgets.comm import CommWidget
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:  # pragma: nocover
+    from typing_extensions import Self
+
 
 pytestmark = pytest.mark.anyio
 
@@ -67,7 +75,7 @@ class Context:
     def add_task(self, task):
         self.tasks.append(task)
 
-    async def __aenter__(self) -> "Context":
+    async def __aenter__(self) -> Self:
         send_send_stream, send_recv_stream = create_memory_object_stream(
             max_buffer_size=math.inf
         )
@@ -126,11 +134,11 @@ class SyncedWidgets:
         while True:
             (
                 msg_type,
-                data,
-                metadata,
+                _data,
+                _metadata,
                 buffers,
-                target_name,
-                target_module,
+                _target_name,
+                _target_module,
             ) = await self.comm.send_recv_stream.receive()
             match msg_type:
                 case "comm_open":

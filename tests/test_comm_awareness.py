@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 from pycrdt import Awareness, Doc, YMessageType, create_awareness_message
+
 from ypywidgets.comm import CommWidget
 
 pytestmark = pytest.mark.anyio

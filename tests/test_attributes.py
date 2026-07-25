@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from anyio import sleep
 from pycrdt import Text
+
 from ypywidgets import Reactive, Widget
 from ypywidgets.comm import CommWidget
 
@@ -74,5 +75,5 @@ async def test_watch_attribute(widget_factories, synced_widgets, capfd, context)
 
         # we're seeing the remote widget watch callback
         await sleep(0.01)
-        out, err = capfd.readouterr()
+        out, _err = capfd.readouterr()
         assert out == "foo changed: 'None'->'foo'\n"

@@ -92,10 +92,10 @@ class CommWidget(Widget):
         _model_name = self.ydoc["_model_name"] = Text()
         _model_name += model_name
         if comm_metadata is None:
-            comm_metadata = dict(
-                ymodel_name=model_name,
-                create_ydoc=not ydoc,
-            )
+            comm_metadata = {
+                "ymodel_name": model_name,
+                "create_ydoc": not ydoc,
+            }
         self._comm = create_widget_comm(comm_data, comm_metadata, comm_id)
         self._comm_provider = CommProvider(self.ydoc, self._comm)
 
