@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 from pycrdt import Awareness, Doc, YMessageType, create_awareness_message
+
 from ypywidgets.comm import CommWidget
 
 pytestmark = pytest.mark.anyio
@@ -29,7 +30,7 @@ async def test_comm_widget_exposes_provider_awareness():
     assert widget.awareness is widget._comm_provider.awareness
 
 
-async def test_comm_widget_awareness_observe_and_unobserve():
+async def test_comm_widget_awareness_observe_and_unobserve() -> None:
     widget = CommWidget()
 
     events: list[str] = []
