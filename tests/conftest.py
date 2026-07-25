@@ -76,9 +76,13 @@ class Context:
         self.tasks.append(task)
 
     async def __aenter__(self) -> Self:
+        send_send_stream: MemoryObjectSendStream
+        send_recv_stream: MemoryObjectReceiveStream
         send_send_stream, send_recv_stream = create_memory_object_stream(
             max_buffer_size=math.inf
         )
+        recv_send_stream: MemoryObjectSendStream
+        recv_recv_stream: MemoryObjectReceiveStream
         recv_send_stream, recv_recv_stream = create_memory_object_stream(
             max_buffer_size=math.inf
         )

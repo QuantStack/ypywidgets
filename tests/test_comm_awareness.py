@@ -30,7 +30,7 @@ async def test_comm_widget_exposes_provider_awareness():
     assert widget.awareness is widget._comm_provider.awareness
 
 
-async def test_comm_widget_awareness_observe_and_unobserve():
+async def test_comm_widget_awareness_observe_and_unobserve() -> None:
     widget = CommWidget()
 
     events: list[str] = []
