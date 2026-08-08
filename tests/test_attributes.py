@@ -46,6 +46,7 @@ async def test_create_ydoc(synced_widgets, context):
 async def test_sync_attribute(widget_factories, synced_widgets, context):
     async with context:
         local_widget = await synced_widgets.get_local_widget()
+        local_widget.foo = "foo3"
         remote_widget = await synced_widgets.get_remote_widget()
 
         with pytest.raises(AttributeError):
@@ -54,8 +55,10 @@ async def test_sync_attribute(widget_factories, synced_widgets, context):
         with pytest.raises(AttributeError):
             assert remote_widget.wrong_attr2
 
+        await sleep(0.01)
+        assert remote_widget.foo == "foo3"
         local_widget.foo = "foo2"
-        assert remote_widget.foo is None  # not synced yet
+        assert remote_widget.foo == "foo3"  # not synced yet
         await sleep(0.01)  # wait for sync
         assert remote_widget.foo == "foo2"
 

@@ -54,6 +54,8 @@ class CommProvider:
         msg = create_sync_message(ydoc)
         self._comm.send(buffers=[msg])
         self._comm.on_msg(self._receive)
+        ydoc.observe(self._bufferize)
+        self._updates: list[bytes] | None = []
 
     @property
     def awareness(self) -> Awareness:
@@ -67,15 +69,23 @@ class CommProvider:
                 if reply is not None:
                     self._comm.send(buffers=[reply])
                 if message[1] == YSyncMessageType.SYNC_STEP2:
+                    assert self._updates is not None
+                    for update in self._updates:
+                        message = create_update_message(update)
+                        self._comm.send(buffers=[message])
+                    self._updates = None
                     self._ydoc.observe(self._send)
             case YMessageType.AWARENESS:
                 # Same as pycrdt.websocket.yroom: strip Y message kind, decode body.
                 update = read_message(message[1:])
                 self._awareness.apply_awareness_update(update, None)
 
+    def _bufferize(self, event: TransactionEvent):
+        if self._updates is not None:
+            self._updates.append(event.update)
+
     def _send(self, event: TransactionEvent):
-        update = event.update
-        message = create_update_message(update)
+        message = create_update_message(event.update)
         self._comm.send(buffers=[message])
 
 
